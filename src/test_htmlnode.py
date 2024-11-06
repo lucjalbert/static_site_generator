@@ -1,6 +1,6 @@
 import unittest
 
-from htmlnode import HTMLNode, LeafNode
+from htmlnode import HTMLNode, LeafNode, ParentNode
 
 
 class TestHTMLNode(unittest.TestCase):
@@ -63,6 +63,19 @@ class TestLeafNode(unittest.TestCase):
         leaf_node_multiprops = LeafNode("a", "Click me!", {"href": "https://www.google.com", "class": "link-button", "id": "main-link"})
         self.assertEqual(leaf_node_multiprops.to_html(), "<a href=\"https://www.google.com\" class=\"link-button\" id=\"main-link\">Click me!</a>")
 
+class TestParentNode(unittest.TestCase):
+    def test_parent_values(self):
+        with self.assertRaises(ValueError):
+            parent_node = ParentNode(None, "h1")
+            parent_node.to_html()
+
+        with self.assertRaises(ValueError):
+            parent_node = ParentNode(LeafNode(None, "Text"), None)
+            parent_node.to_html()
+
+        with self.assertRaises(ValueError):
+            parent_node = ParentNode(LeafNode(None, "Text"), "")
+            parent_node.to_html()
 
 if __name__ == "__main__":
     unittest.main()
