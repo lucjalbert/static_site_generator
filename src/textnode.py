@@ -16,14 +16,14 @@ class TextNode:
         self.text = text
         self.text_type = text_type
         self.url = url
-    
+
     def __eq__(self, other):
         return (
             self.text == other.text and
             self.text_type == other.text_type and
             self.url == other.url
         )
-    
+
     def __repr__(self):
         return f"TextNode({self.text}, {self.text_type.value}, {self.url})"
 
@@ -44,3 +44,22 @@ def text_node_to_html_node(text_node):
             return LeafNode("img", "", {"src" : text_node.url, "alt" : text_node.text})
         case _:
             raise ValueError(f"Invalid text type: {text_node.text_type}")
+        
+
+def split_nodes_delimiter(old_nodes, delimiter, text_type):
+    new_nodes = []
+
+    for node in old_nodes:
+        if node.text_type != TextType.TEXT:
+            new_nodes.append(node)
+            continue
+        split_text = node.text.split(delimiter)
+        for i in range(0, len(split_text)):
+            if i % 2 == 0:
+                new_type = TextType.TEXT
+            else:
+                new_type = text_type
+            new_nodes.append(TextNode(split_text[i], new_type))
+
+    print(new_nodes)
+    return new_nodes
