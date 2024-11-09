@@ -1,4 +1,5 @@
 from enum import Enum
+from functools import reduce
 from htmlnode import LeafNode
 
 
@@ -47,19 +48,34 @@ def text_node_to_html_node(text_node):
         
 
 def split_nodes_delimiter(old_nodes, delimiter, text_type):
+    def create_inline_node(acc, current_text):
+        inline_nodes, inside_delimiter = acc
+        inline_nodes.append(TextNode(
+            current_text,
+            text_type if inside_delimiter else TextType.TEXT
+        ))
+        return inline_nodes, not inside_delimiter
+    
     new_nodes = []
 
-    for node in old_nodes:
-        if node.text_type != TextType.TEXT:
-            new_nodes.append(node)
+    for old_node in old_nodes:
+        if old_node.text_type != TextType.TEXT:
+            new_nodes.append(old_node)
             continue
-        split_text = node.text.split(delimiter)
-        for i in range(0, len(split_text)):
-            if i % 2 == 0:
-                new_type = TextType.TEXT
-            else:
-                new_type = text_type
-            new_nodes.append(TextNode(split_text[i], new_type))
 
-    print(new_nodes)
+        split_text = old_node.text.split(delimiter)
+
+        if len(split_text) % 2 == 0:
+            raise ValueError("Invalid markdown, formatted section not closed")
+
+        inside_delimiter = False
+        if old_node.text[:len(delimiter)] == delimiter:
+            del split_text[0]
+            inside_delimiter = True
+        if old_node.text[-len(delimiter):] == delimiter:
+            del split_text[-1]
+
+        inline_nodes, _ = reduce(create_inline_node, split_text, ([], inside_delimiter))
+        new_nodes.extend(inline_nodes)
+
     return new_nodes
