@@ -31,7 +31,7 @@ class TestBlocksMarkdown(unittest.TestCase):
 
     def test_markdown_to_blocks_heading(self):
         # Arrange
-        block = """# this block is 
+        block = """#### this block is 
 a heading"""
         solution = BlockType.HEADING
 
