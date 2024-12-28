@@ -1,6 +1,5 @@
 import re
 from enum import Enum
-from functools import reduce
 from htmlnode import LeafNode
 
 
@@ -66,7 +65,6 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
         # Create a list for current iteration nodes and another for sections between the markdown symbol
         split_nodes = []
         sections = old_node.text.split(delimiter)
-        
         # If the length of text sections when split on delimiter is even, that means there is an odd amount of delimiters. Invalid markdown syntax
         if len(sections) % 2 == 0:
             raise ValueError("Invalid markdown, formatted section not closed")
@@ -99,13 +97,16 @@ def split_nodes_image(old_nodes):
         # If a node's type is not raw Text, move on. This program does not support nested markdown syntax
         if old_node.text_type != TextType.TEXT:
             new_nodes.append(old_node)
-            continue
-        
+            continue       
         
         old_node_text_copy = old_node.text
         # Use Regex to store all images in an (alt_text, url) list of tuples
         images = extract_markdown_images(old_node_text_copy)
         
+        if not images:
+            new_nodes.append(old_node)
+            continue
+
         for image in images:
 
             # Recreate the original image markdown syntax from Regex results
@@ -138,7 +139,9 @@ def split_nodes_link(old_nodes):
     for old_node in old_nodes:
         old_node_text_copy = old_node.text
         links = extract_markdown_links(old_node_text_copy)
-        
+        if not links:
+            new_nodes.append(old_node)
+            continue        
         for link in links:
             markdown_link = f"[{link[0]}]({link[1]})"
             text_before = old_node_text_copy.split(markdown_link)[0]
@@ -168,9 +171,9 @@ def extract_markdown_links(text):
 # Use all split functions to translate a full string of markdown to a list of TextNode objects
 def text_to_textnodes(text):
     nodes = [TextNode(text, TextType.TEXT)]
+    nodes = split_nodes_image(nodes)
+    nodes = split_nodes_link(nodes)
     nodes = split_nodes_delimiter(nodes, "**", TextType.BOLD)
     nodes = split_nodes_delimiter(nodes, "*", TextType.ITALIC)
     nodes = split_nodes_delimiter(nodes, "`", TextType.CODE)
-    nodes = split_nodes_image(nodes)
-    nodes = split_nodes_link(nodes)
     return nodes
