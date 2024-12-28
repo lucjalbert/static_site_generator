@@ -1,5 +1,5 @@
 from blocks_markdown import markdown_to_blocks, block_to_block_type
-from htmlnode import HTMLNode
+from htmlnode import HTMLNode, ParentNode
 from blocks_markdown import BlockType
 from textnode import text_to_textnodes, text_node_to_html_node
 
@@ -19,27 +19,29 @@ def markdown_to_html_node(markdown):
             list_nodes = []
             for line in lines:
                 list_node_children = text_to_children(line)
-                html_node = HTMLNode("li", None, list_node_children)
+                html_node = ParentNode("li", list_node_children)
                 list_nodes.append(html_node)
             children = list_nodes
         else:
-            children = text_to_children(value)
+            lines = value.split("\n")
+            paragraph = " ".join(lines)
+            children = text_to_children(paragraph)
         
         props = get_block_props(block)
 
         # Code blocks require nested pre/code tags which can't be handled by the standard HTMLNode method
         if block_type == BlockType.CODE:
-            html_block = HTMLNode("pre", None, [
-                HTMLNode("code", value, children, props)
+            html_block = ParentNode("pre", None, [
+                ParentNode("code", children, props)
                 ], None)
             div_node_children.append(html_block)
             continue
 
-        html_block = HTMLNode(tag, value, children, props)
+        html_block = ParentNode(tag, children, props)
         div_node_children.append(html_block)
-    
-    div_node = HTMLNode("div", None, div_node_children, None)
-    return div_node
+
+    div_node = ParentNode("div", div_node_children)
+    return div_node.to_html()
 
 
 
