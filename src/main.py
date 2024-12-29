@@ -1,7 +1,7 @@
-from textnode import TextNode, TextType
+import shutil
 
 def main():
-    print(TextNode("Here is text", TextType.BOLD, "https//google"))
+    shutil.rmtree("/public")
 
 
 main()
