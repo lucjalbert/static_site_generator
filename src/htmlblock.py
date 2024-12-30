@@ -31,9 +31,7 @@ def markdown_to_html_node(markdown):
 
         # Code blocks require nested pre/code tags which can't be handled by the standard HTMLNode method
         if block_type == BlockType.CODE:
-            html_block = ParentNode("pre", None, [
-                ParentNode("code", children, props)
-                ], None)
+            html_block = ParentNode("pre", [ParentNode("code", children)])
             div_node_children.append(html_block)
             continue
 
