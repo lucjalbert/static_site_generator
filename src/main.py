@@ -5,10 +5,11 @@ from htmlblock import markdown_to_html_node
 
 def main():
     tree_source = "./static"
-    tree_destination = "./public"
+    tree_destination = "./docs"
     content_path = "./content"
     template_path = "./template.html"
-    destination_path = "./public"
+    destination_path = "./docs"
+    basepath = sys.argv[1] if len(sys.argv) > 1 else "/"
    
     if os.path.exists(tree_destination):
         shutil.rmtree(tree_destination)
@@ -20,7 +21,7 @@ def main():
     
     copy_tree(tree_source, tree_destination)
 
-    generate_pages_recursive(content_path, template_path, destination_path)
+    generate_pages_recursive(content_path, template_path, destination_path, basepath)
 
 
 def copy_tree(tree_source, tree_destination):
@@ -46,7 +47,7 @@ def extract_title(markdown):
     return header_content
 
 
-def generate_page(content_path, template_path, destination_path):
+def generate_page(content_path, template_path, destination_path, basepath):
     print(f"Generating page from {content_path} to {destination_path} using {template_path}")
     
     with open(content_path, "r") as file:
@@ -64,6 +65,8 @@ def generate_page(content_path, template_path, destination_path):
     html_content = markdown_to_html_node(markdown_document)
     page_title = extract_title(markdown_document)
     html_page = template.replace("{{ Title }}", page_title).replace("{{ Content }}", html_content)
+    html_page = html_page.replace('href="/', f'href="{basepath}')
+    html_page = html_page.replace('src="/', f'src="{basepath}')
 
 
     destination_directory = os.path.dirname(destination_path)
@@ -74,16 +77,16 @@ def generate_page(content_path, template_path, destination_path):
         file.write(html_page)
 
 
-def generate_pages_recursive(content_dir_path, template_path, destination_dir_path):
+def generate_pages_recursive(content_dir_path, template_path, destination_dir_path, basepath):
     print(f"WORKING DIRECTORY: {content_dir_path}")
     for element in os.listdir(content_dir_path):
         element_src_path = os.path.join(content_dir_path, element)
         element_dest_path = os.path.join(destination_dir_path, element.replace(".md", ".html"))
         if os.path.isfile(element_src_path):
-            generate_page(element_src_path, template_path, element_dest_path)
+            generate_page(element_src_path, template_path, element_dest_path, basepath)
         else:
             os.makedirs(element_dest_path, exist_ok=True)
-            generate_pages_recursive(element_src_path, template_path, element_dest_path)
+            generate_pages_recursive(element_src_path, template_path, element_dest_path, basepath)
 
     
 if __name__ == "__main__":
