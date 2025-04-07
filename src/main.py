@@ -70,7 +70,7 @@ def generate_page(content_path, template_path, destination_path, basepath):
 
 
     destination_directory = os.path.dirname(destination_path)
-    if not os.path.exists(os.path.dirname(destination_directory)):
+    if not os.path.exists(destination_directory):
         os.makedirs(destination_directory, exist_ok=True)
     
     with open(destination_path, "w") as file:
