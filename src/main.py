@@ -1,4 +1,5 @@
 import os
+import sys
 import shutil
 from htmlblock import markdown_to_html_node
 
@@ -8,7 +9,7 @@ def main():
     content_path = "./content"
     template_path = "./template.html"
     destination_path = "./public"
-    
+   
     if os.path.exists(tree_destination):
         shutil.rmtree(tree_destination)
     
@@ -76,12 +77,8 @@ def generate_page(content_path, template_path, destination_path):
 def generate_pages_recursive(content_dir_path, template_path, destination_dir_path):
     print(f"WORKING DIRECTORY: {content_dir_path}")
     for element in os.listdir(content_dir_path):
-        print(element)
         element_src_path = os.path.join(content_dir_path, element)
         element_dest_path = os.path.join(destination_dir_path, element.replace(".md", ".html"))
-        print(element_src_path)
-        print(element_dest_path)
-
         if os.path.isfile(element_src_path):
             generate_page(element_src_path, template_path, element_dest_path)
         else:
